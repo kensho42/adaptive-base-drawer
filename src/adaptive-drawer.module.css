@@ -1,0 +1,137 @@
+/* Host utility classes and unlayered CSS may override these component defaults. */
+@layer components {
+/* Motion animates this block only. The intrinsic stage never inherits its height. */
+.height { flex: 0 1 auto; min-height: 0; overflow: hidden; }
+.scroll { height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; touch-action: auto; }
+.intrinsic { display: flow-root; }
+.stage { position: relative; display: flow-root; outline: none; }
+.panel { display: flow-root; }
+.panel[data-panel-present='false'] { pointer-events: none; user-select: none; }
+
+.backdrop {
+  position: fixed; inset: 0; z-index: 50; min-height: 100dvh;
+  background: rgb(0 0 0 / 40%);
+  opacity: max(var(--drawer-overlay-min-opacity, 0), calc(1 - var(--drawer-swipe-progress, 0)));
+  transition: opacity 450ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.backdrop[data-snap-points] { --drawer-overlay-min-opacity: 0.5; }
+.backdrop[data-starting-style], .backdrop[data-ending-style] { opacity: 0; }
+.backdrop[data-swiping] { transition-duration: 0ms; }
+.backdrop[data-ending-style] { pointer-events: none; transition-duration: calc(var(--drawer-swipe-strength, 1) * 400ms); }
+.viewport { position: fixed; inset: 0; z-index: 50; pointer-events: none; user-select: none; }
+.viewport[data-modal='true'] { pointer-events: auto; }
+/* All defaults are private and local: never redefine the host's shadcn tokens. */
+.popup {
+  --_drawer-default-background: #fff;
+  --_drawer-default-foreground: #18181b;
+  --_drawer-default-border: #e4e4e7;
+  --_drawer-default-muted: #f4f4f5;
+  --_drawer-default-muted-foreground: #71717a;
+  --_drawer-default-ring: #a1a1aa;
+  --_drawer-radius: var(--adaptive-drawer-radius, calc(var(--radius, 0.625rem) + 4px));
+  --bleed: 3rem;
+  --peek: 1rem;
+  --stack-height: var(--drawer-frontmost-height, var(--drawer-height, 0px));
+  --stack-progress: clamp(0, var(--drawer-swipe-progress, 0), 1);
+  --stack-step: 0.05;
+  --stack-peek-offset: max(0px, calc((var(--nested-drawers, 0) - var(--stack-progress)) * var(--peek)));
+  --stack-scale-base: max(0, calc(1 - (var(--nested-drawers, 0) * var(--stack-step))));
+  --stack-scale: clamp(0, calc(var(--stack-scale-base) + var(--stack-step) * var(--stack-progress)), 1);
+  --stack-shrink: calc(1 - var(--stack-scale));
+  position: fixed; z-index: 50; pointer-events: auto;
+  box-sizing: border-box; display: flex; flex-direction: column; min-height: 0;
+  margin: var(--drawer-inset, 0px); outline: none;
+  background: var(--adaptive-drawer-background, var(--popover, var(--background, var(--_drawer-default-background))));
+  color: var(--adaptive-drawer-foreground, var(--popover-foreground, var(--foreground, var(--_drawer-default-foreground))));
+  border: 1px solid var(--adaptive-drawer-border, var(--border, var(--_drawer-default-border)));
+  box-shadow: 0 -12px 60px rgb(0 0 0 / 9%);
+  /* Ordinary popup follows the inner numeric animation, never --drawer-height.
+     That variable is Base UI's observation of the popup, so using it here
+     would freeze/circularly constrain the intrinsic content measurement. */
+  height: auto;
+  transform: translate3d(var(--translate-x, 0px), var(--translate-y, 0px), 0) scale(var(--stack-scale));
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1), height 450ms cubic-bezier(0.22, 1, 0.36, 1), filter 450ms, opacity 450ms;
+  will-change: transform;
+}
+.popup::after { content: ''; position: absolute; pointer-events: none; background: inherit; }
+.popup:is([data-swipe-direction='down'], [data-swipe-direction='up']) {
+  inset-inline: 0; max-height: var(--drawer-content-max-height, calc(100dvh - 6rem));
+  border-radius: var(--_drawer-radius) var(--_drawer-radius) 0 0;
+}
+.popup:is([data-swipe-direction='down'], [data-swipe-direction='up'])[data-snap-points] {
+  height: 100dvh;
+  padding-bottom: max(0px, calc(var(--drawer-snap-point-offset, 0px) + var(--drawer-swipe-movement-y, 0px)));
+}
+.popup[data-swipe-direction='down'] {
+  bottom: 0; transform-origin: bottom;
+  --closed-transform: translate3d(0, calc(100% + var(--drawer-inset, 0px) + 2px), 0);
+  --translate-y: calc(var(--drawer-snap-point-offset, 0px) + var(--drawer-swipe-movement-y, 0px) - var(--stack-peek-offset) - var(--stack-shrink) * var(--stack-height));
+}
+.popup[data-swipe-direction='down']::after { top: 100%; inset-inline: -1px; height: var(--bleed); }
+.popup[data-swipe-direction='up'] {
+  top: 0; transform-origin: top; border-radius: 0 0 var(--_drawer-radius) var(--_drawer-radius);
+  --closed-transform: translate3d(0, calc(-100% - var(--drawer-inset, 0px) - 2px), 0);
+  --translate-y: calc(var(--drawer-snap-point-offset, 0px) + var(--drawer-swipe-movement-y, 0px) + var(--stack-peek-offset) + var(--stack-shrink) * var(--stack-height));
+}
+.popup[data-swipe-direction='up']::after { bottom: 100%; inset-inline: -1px; height: var(--bleed); }
+.popup:is([data-swipe-direction='left'], [data-swipe-direction='right']) { inset-block: 0; width: var(--drawer-content-width, min(75vw, 24rem)); }
+.popup[data-swipe-direction='left'] {
+  left: 0; transform-origin: left; border-radius: 0 var(--_drawer-radius) var(--_drawer-radius) 0;
+  --closed-transform: translate3d(calc(-100% - var(--drawer-inset, 0px) - 2px), 0, 0);
+  --translate-x: calc(var(--drawer-swipe-movement-x, 0px) + var(--stack-peek-offset) + var(--stack-shrink) * 100%);
+}
+.popup[data-swipe-direction='left']::after { right: 100%; inset-block: -1px; width: var(--bleed); }
+.popup[data-swipe-direction='right'] {
+  right: 0; transform-origin: right; border-radius: var(--_drawer-radius) 0 0 var(--_drawer-radius);
+  --closed-transform: translate3d(calc(100% + var(--drawer-inset, 0px) + 2px), 0, 0);
+  --translate-x: calc(var(--drawer-swipe-movement-x, 0px) - var(--stack-peek-offset) - var(--stack-shrink) * 100%);
+}
+.popup[data-swipe-direction='right']::after { left: 100%; inset-block: -1px; width: var(--bleed); }
+.popup[data-nested-drawer-open] { height: var(--stack-height); overflow: hidden; filter: brightness(0.95); }
+.popup[data-starting-style], .popup[data-ending-style] { transform: var(--closed-transform); }
+.popup[data-swiping], .popup[data-nested-drawer-swiping] { transition-duration: 0ms; }
+.popup[data-ending-style] { opacity: 0.9999; transition-duration: calc(var(--drawer-swipe-strength, 1) * 400ms); }
+.content { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; border-radius: inherit; user-select: text; transition: opacity 300ms; }
+.popup[data-nested-drawer-open] .content { opacity: 0; }
+.popup[data-nested-drawer-swiping] .content { opacity: 1; }
+.popup[data-swiping] .content { user-select: none; }
+.handle { flex-shrink: 0; width: 36px; height: 4px; margin: 12px auto 4px; border-radius: 999px; background: var(--adaptive-drawer-muted, var(--muted, var(--_drawer-default-muted))); cursor: grab; touch-action: none; }
+.popup[data-swipe-direction='up'] .handle { order: 1; }
+.popup[data-nested-drawer-open] .handle { opacity: 0; }
+.popup[data-nested-drawer-swiping] .handle { opacity: 1; }
+/* A host's tokens always win, including next-themes' .dark/.light classes.
+   OS dark mode is a fallback only when no explicit root mode was selected. */
+:global(.dark) .popup {
+  --_drawer-default-background: #18181b;
+  --_drawer-default-foreground: #fafafa;
+  --_drawer-default-border: #3f3f46;
+  --_drawer-default-muted: #27272a;
+  --_drawer-default-muted-foreground: #a1a1aa;
+  --_drawer-default-ring: #71717a;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not(.light):not(.dark)) .popup {
+    --_drawer-default-background: #18181b;
+    --_drawer-default-foreground: #fafafa;
+    --_drawer-default-border: #3f3f46;
+    --_drawer-default-muted: #27272a;
+    --_drawer-default-muted-foreground: #a1a1aa;
+    --_drawer-default-ring: #71717a;
+  }
+}
+.title { margin: 0; font-size: 1rem; line-height: 1.5; font-weight: 600; color: inherit; }
+.description {
+  margin: 0; font-size: 0.875rem; line-height: 1.5;
+  color: var(--adaptive-drawer-muted-foreground, var(--muted-foreground, var(--_drawer-default-muted-foreground, #71717a)));
+}
+.popup:focus-visible,
+.popup :where(button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid var(--adaptive-drawer-ring, var(--ring, var(--_drawer-default-ring)));
+  outline-offset: 2px;
+}
+.popup:focus-visible { outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) {
+  .popup, .backdrop, .content { transition-duration: 0ms !important; }
+}
+
+}

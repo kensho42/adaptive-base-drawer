@@ -147,3 +147,11 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Adaptive Base Drawer build and browser-test artifacts
+node_modules/
+dist/
+demo-dist/
+test-results/
+playwright-report/
+*.local
