@@ -22,9 +22,36 @@ Smooth growth **and** shrinkage, asynchronous/in-place resizing, optional cross-
 - A React bundler with CSS Modules support, such as Vite or Next.js.
 - A modern browser with `ResizeObserver` and `inert` support.
 
-This repository has not been published to npm. Choose source installation or build a local package; `npm install adaptive-base-drawer` is not an available installation method.
+This repository has not been published to npm. Install with the shadcn CLI, copy the source, or build a local package; `npm install adaptive-base-drawer` is not an available installation method.
 
-### Option 1: copy the source (recommended for shadcn projects)
+### Option 1: install with shadcn (recommended)
+
+In an existing shadcn project, run:
+
+```sh
+npx shadcn@latest add kensho42/adaptive-base-drawer/adaptive-drawer
+```
+
+The CLI installs Base UI and Motion and copies all four runtime files into
+`adaptive-base-drawer/` under your configured `ui` alias (normally
+`src/components/ui/adaptive-base-drawer/`). CSS Modules stay alongside the
+component and are imported automatically. Your existing theme tokens are used;
+no theme variables or Tailwind configuration are added.
+
+```tsx
+import {
+  AdaptiveDrawer,
+  AdaptiveDrawerTrigger,
+  AdaptiveDrawerContent,
+} from '@/components/ui/adaptive-base-drawer';
+```
+
+Use your project's actual UI alias if it differs. For a project without shadcn,
+use the source-copy option below. This is a direct GitHub registry installation;
+no custom namespace configuration is needed. The root [`registry.json`](registry.json)
+references the source files directly, so there is no generated registry to maintain.
+
+### Option 2: copy the source
 
 Install the dependencies **in your application**:
 
@@ -46,7 +73,7 @@ Import from that directory's `index.ts`. The component imports its CSS Module au
 
 No Tailwind dependency or configuration is required. If your project already uses Tailwind, the component works alongside it.
 
-### Option 2: build and install a local package
+### Option 3: build and install a local package
 
 From a clone of this repository:
 
@@ -77,7 +104,7 @@ The source-copy method and package method expose the same API. The package build
 
 ## Quickstart
 
-This complete example assumes source installation and lives in `src/example.tsx`. For a package installation, change the component import to `adaptive-base-drawer` and include its stylesheet as shown above.
+This complete example assumes source-copy installation and lives in `src/example.tsx`. For shadcn installation, import from `@/components/ui/adaptive-base-drawer` instead. For a package installation, change the component import to `adaptive-base-drawer` and include its stylesheet as shown above.
 
 ```tsx
 "use client";

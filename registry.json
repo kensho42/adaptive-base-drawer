@@ -1,0 +1,39 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "adaptive-base-drawer",
+  "homepage": "https://github.com/kensho42/adaptive-base-drawer",
+  "items": [
+    {
+      "name": "adaptive-drawer",
+      "type": "registry:ui",
+      "title": "Adaptive Base Drawer",
+      "description": "Adaptive-height Base UI Drawer with Motion-powered content transitions and shadcn theme tokens.",
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "motion@^14.0.0"
+      ],
+      "files": [
+        {
+          "path": "src/adaptive-drawer.tsx",
+          "type": "registry:ui",
+          "target": "@ui/adaptive-base-drawer/adaptive-drawer.tsx"
+        },
+        {
+          "path": "src/adaptive-drawer.module.css",
+          "type": "registry:ui",
+          "target": "@ui/adaptive-base-drawer/adaptive-drawer.module.css"
+        },
+        {
+          "path": "src/use-element-height.ts",
+          "type": "registry:ui",
+          "target": "@ui/adaptive-base-drawer/use-element-height.ts"
+        },
+        {
+          "path": "src/index.ts",
+          "type": "registry:ui",
+          "target": "@ui/adaptive-base-drawer/index.ts"
+        }
+      ]
+    }
+  ]
+}
